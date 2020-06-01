@@ -10,13 +10,18 @@ import torch.nn.functional as F
 import numpy as np
 
 
-def bcnn_loss(c1, c2, f1, y_train, weights):
+def bcnn_loss(c1, c2, f1, y_train, weights, device="cpu"):
     """
         Function to calculate weighted 3 term loss function for BCNN
     """
 
-    y_c1_train = l1_labels(y_train)
-    y_c2_train = l2_labels(y_train)
+    if device=="cpu":
+      y_c1_train = l1_labels(y_train)
+      y_c2_train = l2_labels(y_train)
+    else:
+      y_c1_train = l1_labels(y_train.to("cpu")).to(device)
+      y_c2_train = l2_labels(y_train.to("cpu")).to(device)
+      weights = weights.to(device)
 
     l1 = F.cross_entropy(c1, y_c1_train)
     l2 = F.cross_entropy(c2, y_c2_train)

@@ -28,6 +28,13 @@ random_seed   = 42
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
+use_cuda = torch.cuda.is_available()
+device = torch.device("cuda" if use_cuda else "cpu")
+kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+print("Device: ",device)
+
+# -----------------------------------------------------------------------------
+
 transform = transforms.Compose([
             transforms.Grayscale(num_output_channels=1),
             transforms.Resize(50),
@@ -37,22 +44,22 @@ transform = transforms.Compose([
 
 
 trainset = CIFAR5(root='./cifar5data', train=True, download=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, **kwargs)
 
 testset = CIFAR5(root='./cifar5data', train=False, download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False)
+testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, **kwargs)
 
 classes = ('plane', 'car', 'bird', 'horse', 'truck')
 
 # -----------------------------------------------------------------------------
 
-model = BaseCNN(in_chan=1, params=params, kernel_size=3)
+model = BaseCNN(in_chan=1, params=params, kernel_size=3).to(device)
 learning_rate = lr0
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=decay)
 
 # -----------------------------------------------------------------------------
 
-summary(model, (1, imsize, imsize))
+summary(model.to("cpu"), (1, imsize, imsize))
 
 # -----------------------------------------------------------------------------
 
@@ -67,6 +74,7 @@ for epoch in range(epochs):
     for batch, (x_train, y_train) in enumerate(trainloader):
 
         model.zero_grad()
+        x_train, y_train = x_train.to(device), y_train.to(device)
         f1_pred, _ = model(x_train)
 
         loss = F.cross_entropy(f1_pred, y_train)
@@ -85,6 +93,7 @@ for epoch in range(epochs):
         test_losses, test_accs = [], []; acc = 0
         for i, (x_test, y_test) in enumerate(testloader):
 
+            x_test, y_test = x_test.to(device), y_test.to(device)
             f1_testpred, _ = model(x_test)
 
             loss = F.cross_entropy(f1_testpred, y_test)
@@ -102,5 +111,5 @@ for epoch in range(epochs):
 
 print("Final test error: ",100.*(1 - epoch_testaccs[-1]))
 
-np.savez("testloss.npz",np.array(epoch_testloss))
-np.savez("trainloss.npz",np.array(epoch_trainloss))
+np.savez("basetestloss.npz",np.array(epoch_testloss))
+np.savez("basetrainloss.npz",np.array(epoch_trainloss))

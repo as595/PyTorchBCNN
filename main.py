@@ -28,6 +28,13 @@ random_seed   = 42
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
+use_cuda = torch.cuda.is_available()
+device = torch.device("cuda" if use_cuda else "cpu")
+kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+print("Device: ",device)
+
+# -----------------------------------------------------------------------------
+
 transform = transforms.Compose([
             transforms.Grayscale(num_output_channels=1),
             transforms.Resize(50),
@@ -46,13 +53,13 @@ classes = ('plane', 'car', 'bird', 'horse', 'truck')
 
 # -----------------------------------------------------------------------------
 
-model = BCNN(in_chan=1, params=params, kernel_size=3)
+model = BCNN(in_chan=1, params=params, kernel_size=3).to(device)
 learning_rate = lr0
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=decay)
 
 # -----------------------------------------------------------------------------
 
-summary(model, (1, imsize, imsize))
+summary(model.to("cpu"), (1, imsize, imsize))
 
 # -----------------------------------------------------------------------------
 
@@ -67,9 +74,10 @@ for epoch in range(epochs):
     for batch, (x_train, y_train) in enumerate(trainloader):
 
         model.zero_grad()
+        x_train, y_train = x_train.to(device), y_train.to(device)
         c1_pred, c2_pred, f1_pred = model(x_train)
 
-        loss = bcnn_loss(c1_pred, c2_pred, f1_pred, y_train, weights)
+        loss = bcnn_loss(c1_pred, c2_pred, f1_pred, y_train, weights, device=device)
         loss.backward()
         optimizer.step()
 
@@ -85,9 +93,10 @@ for epoch in range(epochs):
         test_losses, test_accs = [], []; acc = 0
         for i, (x_test, y_test) in enumerate(testloader):
 
+            x_test, y_test = x_test.to(device), y_test.to(device)
             c1_testpred, c2_testpred, f1_testpred = model(x_test)
 
-            loss = bcnn_loss(c1_testpred, c2_testpred, f1_testpred, y_test, weights)
+            loss = bcnn_loss(c1_testpred, c2_testpred, f1_testpred, y_test, weights, device=device)
 
             acc = (f1_testpred.argmax(dim=-1) == y_test).to(torch.float32).mean()
             test_losses.append(loss.item())
@@ -102,5 +111,5 @@ for epoch in range(epochs):
 
 print("Final test error: ",100.*(1 - epoch_testaccs[-1]))
 
-np.savez("testloss.npz",np.array(epoch_testloss))
-np.savez("trainloss.npz",np.array(epoch_trainloss))
+np.savez("bcnntestloss.npz",np.array(epoch_testloss))
+np.savez("bcnntrainloss.npz",np.array(epoch_trainloss))
