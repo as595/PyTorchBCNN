@@ -14,7 +14,7 @@ To run:
 python main.py
 ```
 
-User defined parameters are set at the start of the main.py script:
+User defined parameters are set at the start of the [main.py](./main.py) script:
 
 ```python
 batch_size    = 4                   # number of samples per mini-batch
@@ -26,3 +26,7 @@ momentum      = torch.tensor(8e-1)  # momentum for optimizer
 decay         = torch.tensor(1e-6)  # weight decay for regularisation
 random_seed   = 42
 ```
+
+This runs the BCNN defined in [models.py](./models.py), which has the structure:
+
+![](/media/BCNN.png)
