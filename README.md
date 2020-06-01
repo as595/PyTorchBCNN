@@ -2,7 +2,7 @@
 PyTorch implementation of hierarchical classification for CIFAR5. 
 
 
-The CIFAR5 dataset is a subset of the [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset and contains the target classes: plane, car, bird, horse & truck. This code uses the [torch.transforms]() library to convert the input images from dimensions of (3,32,32) to (1,50,50).
+The CIFAR5 dataset is defined in [cifar5.py](./cifar5.py) is a subset of the [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset and contains the target classes: **plane, car, bird, horse & truck**. This code uses the [torch.transforms]() library to convert the input images from dimensions of (3,32,32) to (1,50,50).
 
 The hierarchical classification scheme is shown in the following diagram:
 
