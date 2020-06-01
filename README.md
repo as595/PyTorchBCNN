@@ -14,7 +14,16 @@ To run:
 python main.py
 ```
 
-The code uses the [torch.transforms]() library to convert the CIFAR5 input images from dimensions of (3,32,32) to (1,50,50).
+The code uses the [torch.transforms]() library to convert the CIFAR5 input images from dimensions of (3,32,32) to (1,50,50):
+
+```python
+transform = transforms.Compose([
+            transforms.Grayscale(num_output_channels=1),
+            transforms.Resize(50),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,))
+            ])
+```
 
 User defined parameters are set at the start of the [main.py](./main.py) script:
 
