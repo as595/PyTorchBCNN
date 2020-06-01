@@ -33,4 +33,4 @@ This runs the BCNN defined in [models.py](./models.py), which has the structure:
 
 ![](/media/BCNN.png)
 
-<img src="https://render.githubusercontent.com/render/math?math=\mathcal{L} = w_1 l_1 + w_2 l_2 + w_3 l_3">
+<img src="https://render.githubusercontent.com/render/math?math=\mathcal{L} = w_1 l_1 %2B w_2 l_2 %2B w_3 l_3">
