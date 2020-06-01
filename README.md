@@ -2,7 +2,7 @@
 PyTorch implementation of hierarchical classification for CIFAR5. 
 
 
-The CIFAR5 dataset is a subset of the [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset and contains the target classes: plane, car, bird, horse & truck. This code uses the [torch.transforms]() library to convert the input images from dimensions of (3,32,32) to (1,50,50).
+The [CIFAR5 dataset](./cifar5.py) is a subset of the [CIFAR10](https://www.cs.toronto.edu/~kriz/cifar.html) dataset and contains the target classes: **plane, car, bird, horse & truck**. 
 
 The hierarchical classification scheme is shown in the following diagram:
 
@@ -12,6 +12,17 @@ To run:
 
 ```python
 python main.py
+```
+
+The code uses the [torch.transforms]() library to convert the CIFAR5 input images from dimensions of (3,32,32) to (1,50,50):
+
+```python
+transform = transforms.Compose([
+            transforms.Grayscale(num_output_channels=1),
+            transforms.Resize(50),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,))
+            ])
 ```
 
 User defined parameters are set at the start of the [main.py](./main.py) script:
@@ -30,3 +41,11 @@ random_seed   = 42
 This runs the BCNN defined in [models.py](./models.py), which has the structure:
 
 ![](/media/BCNN.png)
+
+The loss function is defined as:
+
+<img src="https://render.githubusercontent.com/render/math?math=\mathcal{L} = w_1 l_1 %2B w_2 l_2 %2B w_3 l_3">
+
+where *l1* corresponds to the cross entropy loss from the COARSE1 level, *l2* corresponds to the cross entropy loss from the COARSE2 level and *l3* corresponds to the cross entropy loss from the FINE level. A vector of weights controls the contribution of each level to the combined loss function. 
+
+For example, an input image of a truck would have the following one hot vectors as its targets for each of the three loss components: [[1 0][0 1 0 0][0 0 1 0 0]]. Coarse level classifications are calculated from the original CIFAR5 target classification in the [utils.py](./utils.py) script.
