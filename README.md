@@ -37,6 +37,6 @@ The loss function is defined as:
 
 <img src="https://render.githubusercontent.com/render/math?math=\mathcal{L} = w_1 l_1 %2B w_2 l_2 %2B w_3 l_3">
 
-where *l_1* corresponds to the cross entropy loss from the COARSE1 level, 
+where *l1* corresponds to the cross entropy loss from the COARSE1 level, *l2* corresponds to the cross entropy loss from the COARSE2 level and *l3* corresponds to the cross entropy loss from the FINE level. A vector of weights controls the contribution of each level to the combined loss function. 
 
-For example, an input image of a truck would have the following one hot vectors as its targets for each of the three loss components: [[1 0][0 1 0 0][0 0 1 0 0]].
+For example, an input image of a truck would have the following one hot vectors as its targets for each of the three loss components: [[1 0][0 1 0 0][0 0 1 0 0]]. These are calculated from the original CIFAR5 target classification in the [utils.py](./utils.py) script.
