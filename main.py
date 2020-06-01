@@ -53,13 +53,14 @@ classes = ('plane', 'car', 'bird', 'horse', 'truck')
 
 # -----------------------------------------------------------------------------
 
-model = BCNN(in_chan=1, params=params, kernel_size=3).to(device)
+model = BCNN(in_chan=1, params=params, kernel_size=3)
 learning_rate = lr0
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=decay)
 
 # -----------------------------------------------------------------------------
 
-summary(model.to("cpu"), (1, imsize, imsize))
+summary(model, (1, imsize, imsize))
+model = model.to(device)
 
 # -----------------------------------------------------------------------------
 
