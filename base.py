@@ -12,7 +12,7 @@ from torchsummary import summary
 import numpy as np
 
 from cifar5 import CIFAR5
-from models import BCNN
+from models import BaseCNN
 from utils import bcnn_loss
 
 
@@ -46,7 +46,7 @@ classes = ('plane', 'car', 'bird', 'horse', 'truck')
 
 # -----------------------------------------------------------------------------
 
-model = BCNN(in_chan=1, params=params, kernel_size=3)
+model = BaseCNN(in_chan=1, params=params, kernel_size=3)
 learning_rate = lr0
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=decay)
 
@@ -67,9 +67,9 @@ for epoch in range(epochs):
     for batch, (x_train, y_train) in enumerate(trainloader):
 
         model.zero_grad()
-        c1_pred, c2_pred, f1_pred = model(x_train)
+        f1_pred, _ = model(x_train)
 
-        loss = bcnn_loss(c1_pred, c2_pred, f1_pred, y_train, weights)
+        loss = F.cross_entropy(f1_pred, y_train)
         loss.backward()
         optimizer.step()
 
@@ -77,24 +77,30 @@ for epoch in range(epochs):
         train_accs.append(acc.mean().item())
         train_losses.append(loss.item())
 
+    print('Train: {}, Loss: {}, Accuracy: {}'.format(epoch, np.mean(train_losses), np.mean(train_accs)))
+
     with torch.no_grad():
 
         model.eval()
         test_losses, test_accs = [], []; acc = 0
         for i, (x_test, y_test) in enumerate(testloader):
 
-            c1_testpred, c2_testpred, f1_testpred = model(x_test)
+            f1_testpred, _ = model(x_test)
 
-            loss = bcnn_loss(c1_testpred, c2_testpred, f1_testpred, y_test, weights)
+            loss = F.cross_entropy(f1_testpred, y_test)
 
             acc = (f1_testpred.argmax(dim=-1) == y_test).to(torch.float32).mean()
             test_losses.append(loss.item())
             test_accs.append(acc.mean().item())
 
-    print('Epoch: {}, Loss: {}, Accuracy: {}'.format(epoch, np.mean(test_losses), np.mean(test_accs)))
+    print(' Test: {}, Loss: {}, Accuracy: {}'.format(epoch, np.mean(test_losses), np.mean(test_accs)))
+    print('---')
     epoch_trainaccs.append(np.mean(train_accs))
     epoch_testaccs.append(np.mean(test_accs))
     epoch_trainloss.append(np.mean(train_losses))
     epoch_testloss.append(np.mean(test_losses))
 
 print("Final test error: ",100.*(1 - epoch_testaccs[-1]))
+
+np.savez("testloss.npz",np.array(epoch_testloss))
+np.savez("trainloss.npz",np.array(epoch_trainloss))
