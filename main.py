@@ -77,6 +77,8 @@ for epoch in range(epochs):
         train_accs.append(acc.mean().item())
         train_losses.append(loss.item())
 
+    print('Train: {}, Loss: {}, Accuracy: {}'.format(epoch, np.mean(train_losses), np.mean(train_accs)))
+
     with torch.no_grad():
 
         model.eval()
@@ -91,10 +93,14 @@ for epoch in range(epochs):
             test_losses.append(loss.item())
             test_accs.append(acc.mean().item())
 
-    print('Epoch: {}, Loss: {}, Accuracy: {}'.format(epoch, np.mean(test_losses), np.mean(test_accs)))
+    print(' Test: {}, Loss: {}, Accuracy: {}'.format(epoch, np.mean(test_losses), np.mean(test_accs)))
+    print('---')
     epoch_trainaccs.append(np.mean(train_accs))
     epoch_testaccs.append(np.mean(test_accs))
     epoch_trainloss.append(np.mean(train_losses))
     epoch_testloss.append(np.mean(test_losses))
 
 print("Final test error: ",100.*(1 - epoch_testaccs[-1]))
+
+np.savez("testloss.npz",np.array(epoch_testloss))
+np.savez("trainloss.npz",np.array(epoch_trainloss))
